@@ -1,4 +1,4 @@
-c=["apples","pears"]                                                                       
-for i in c:
-                print(i)
-                print("FRUIT!")
+try:
+	‘’’bruh
+except Exception as e:
+	print(e)

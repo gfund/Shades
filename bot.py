@@ -16,6 +16,8 @@ global oneup
 global autoprotect
 global switch
 global natalia
+global alarms
+alarms=False
 autoprotect=True
 weapons=False
 debug=False
@@ -25,7 +27,7 @@ natalia=True
 switch=True
 intents = discord.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix=';', description="Mark 3 Shades",help_command=None,intents=intents)
+bot = commands.Bot(command_prefix='.', description="Crimson Dynamo",help_command=None,intents=intents)
 
 # NON ASYNC DISCORD BOT FUNCTIONS 
 
@@ -63,6 +65,59 @@ async def performance(channel,start,finish):
   await channel.send(f"Command excecuted in {finish - start} seconds")
 #END OF SECTION
 @bot.command()
+async def hackchat(ctx):
+  import string
+  def gras(length):
+    letters_and_digits = string.ascii_letters + string.digits
+    result_str = ''.join((random.choice(letters_and_digits) for i in range(length)))
+    return result_str
+  await ctx.send("https://beta.hack.chat/?{0}".format(gras(20))) 
+@bot.command()
+async def google(ctx,*term):
+  from six.moves.urllib.request import urlopen
+  from lxml.html import parse
+  from websearch import search
+  termStr = ' '.join(term[:])
+  results = search(termStr, num_results=11)
+  resultEmb = discord.Embed(title=f'Search Results for "{termStr}"',description='----',color=discord.Color.blue())
+  end = len(results)-1
+  await ctx.send('**Searching...**')
+  for result in results:
+    if not result == results[end]:
+      try:
+        url = result
+        page = urlopen(url)
+        p = parse(page)
+        urltitle = p.find(".//title").text
+        print(p.find(".//title").text)
+        resultEmb.add_field(name=str(urltitle), value=str(result),inline=False)
+      except:
+        print('No Title')
+        resultEmb.add_field(name='Title Not Found', value=result,inline=False)
+      #print('ha')
+      #print('<'+result+'>')
+  print('timestamp')
+  resultEmb.timestamp = datetime.datetime.utcnow()
+  print('send embed')
+  await ctx.send(embed=resultEmb)
+  print(results) 
+@bot.command()
+async def whois(ctx,args):
+  if "@" in args.strip(): 
+      memid=int(args.replace("<@!"," ").replace(">"," "))
+      user = await bot.fetch_user(memid)
+  else:   
+  
+   user = await bot.fetch_user(int(args))
+  
+  embed=discord.Embed(title="Result",color=discord.Color.blue())
+  embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(user))
+  embed.add_field(name="Name", value=str(user.name)+"#"+str(user.discriminator), inline=False)
+  embed.add_field(name="Bot", value=user.bot, inline=False)
+  embed.add_field(name="Created At ", value=user.created_at, inline=False)
+  
+  await ctx.send(embed=embed)
+@bot.command()
 async def warmode(ctx):
   global help
   help=False
@@ -75,6 +130,120 @@ async def warmode(ctx):
   global switch
   switch=False
   await ctx.send("Warmode On")
+@bot.command()
+async def eject(ctx,*,args):
+   for guild in bot.guilds:
+    if(args==guild.name):
+      guild=guild
+
+   
+    
+  
+      try:
+       print("IM OUT")
+       await ctx.send("I have left {0}".format(guild.name))
+       await guild.leave()
+     
+      except:
+        await ctx.send("Attempting Delete")
+        await guild.delete()
+        print("OOPS")
+      
+        return
+   
+@bot.command()
+async def warmodeoff(ctx):
+  global help
+  help=True
+  global weapons
+  weapons=False
+  global debug
+  debug=False
+  global autoprotect
+  autoprotect=True
+  global switch
+  switch=True
+  await ctx.send("Warmode Off")
+@bot.command()
+async def patrollog(ctx):
+  channel=ctx.channel
+  uid=ctx.author.id
+  def check(m):
+            return m.channel == channel and m.author.id== uid
+  await ctx.send("Enter your name")
+  msg=await bot.wait_for("message",check=check)
+  await ctx.send(msg.content)
+ 
+@bot.command()
+async def imsearch(ctx,*,args):
+  await ctx.send("**Searching...**")
+  from searches import imsearch
+  imsearch(args)
+  await ctx.send(file=discord.File('search.png'))
+@bot.command()
+async def wikiimsearch(ctx,*,args): 
+    import wikipedia
+    wikipage = wikipedia.page(args)
+   
+   
+    await ctx.send(wikipage.images[0])
+  
+@bot.command()
+async def translate(ctx, language, *, text):
+  from googletrans import Translator
+  translator= Translator()
+  translation = translator.translate(text,dest=language)
+  await ctx.send(translation.text)
+@bot.command()
+
+async def dl(ctx, *, args):
+  
+   import goslate
+   gs = goslate.Goslate()
+   
+
+   
+  
+   language_id = gs.detect(args)
+   await ctx.send(gs.get_languages()[language_id])
+   from googletrans import Translator
+   translator= Translator()
+   translation = translator.translate(args,dest="English")
+   await ctx.send(translation.text)
+@bot.command()
+async def restore(ctx,sid1):
+
+  for guild in bot.guilds:
+    print(id==sid1)
+    print(guild.name)
+    if guild.id==int(sid1):
+      print(guild.id)
+      guild=guild
+      break
+  
+  for categoryx in guild.categories:
+   category=await ctx.guild.create_category(categoryx.name)
+   for text_channel in categoryx.text_channels:
+    
+    await category.create_text_channel(text_channel.name)
+  #for role in 
+@bot.command()
+async def alarm(ctx,*,member:discord.Member):
+    global alarms
+    print(alarm)
+    if alarms==False:
+      alarms=True
+      while alarms==True:
+       await ctx.send(":bell:")
+       await ctx.send(member.mention)
+    if alarms==True:
+     alarms=False
+     await ctx.send("Alarms off")
+     return
+      
+      
+
+   
 @bot.command()
 async def coinflip(ctx):
   x=random.randint(0,1)
@@ -103,8 +272,7 @@ async def help(ctx):
     if command.name!="help":
       send+=command.name+" args"+(' '.join( (*sig.keys(),)))+"\n"
   message= await ctx.send(send)
-  await message.delete(delay=20)
-  
+ 
  else:
    await ctx.send("Help Disabled") 
 @bot.command(name='weptoggle', description='Toggles weapons.')
@@ -152,22 +320,7 @@ async def hackban(ctx,mode,args):
           continue
       
   await ctx.send(user.name+"#"+user.discriminator+" was banned")    
-@bot.command()
-async def whois(ctx,args):
-  if "@" in args.strip(): 
-      memid=int(args.replace("<@!"," ").replace(">"," "))
-      user = await bot.fetch_user(memid)
-  else:   
-  
-   user = await bot.fetch_user(int(args))
-   
-  embed=discord.Embed(title="Result",color=discord.Color.blue())
-  embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/{0.id}/{0.avatar}.png?size=1024".format(user))
-  embed.add_field(name="Name", value=str(user.name)+"#"+str(user.discriminator), inline=False)
-  embed.add_field(name="Bot", value=user.bot, inline=False)
-  embed.add_field(name="Created At ", value=user.created_at, inline=False)
-  
-  await ctx.send(embed=embed)
+
   
   
 
@@ -234,6 +387,7 @@ async def destroy(ctx):
   if weapons:
     for channel in ctx.guild.channels:
       await channel.delete()
+    await ctx.guild.create_text_channel("emergency")
   else:
     await ctx.send("Safety is Currently Activated")
     
@@ -320,6 +474,7 @@ async def bi(ctx):
    
     await ctx.send(embed=embed)
 
+
 @bot.command(name='bluep', description='Sends a blueprint.')
 async def bluep(ctx,*,args):
  try:
@@ -328,7 +483,20 @@ async def bluep(ctx,*,args):
 
  except FileNotFoundError:
    await ctx.send("File Not Found")
+   from os import listdir
+ from os.path import isfile, join
+ onlyfiles = [f for f in listdir("blueprints") if isfile(join("blueprints", f))]
+ number=0
+ embed=discord.Embed(title="Files",color=0xab1616 )
+    
+ for i in onlyfiles:
+   embed.add_field(name="File No.{0}".format(number),value=i,inline=True)
+   number+=1
+ await ctx.send(embed=embed)
   
+@bot.command()
+async def addme(ctx):
+  await ctx.send("")
 @bot.command(name='arith', description='<Insert description here>')
 async def arith(ctx,*,args):
   await ctx.send(evaluate(args))
@@ -392,12 +560,13 @@ async def error(ctx):
 
 @bot.event
 async def on_ready():
+    
     bot.loop.create_task(check1())
     
-    user1=await bot.fetch_user(int(os.environ.get("userx")))
+   # user1=await bot.fetch_user(int(os.environ.get("userx")))
     print("Systems Booted")
 
-    await user1.send("Booted Systems ")
+   
 @bot.event
 async def on_command_error(ctx, error):
  
@@ -416,37 +585,68 @@ async def on_command_error(ctx, error):
 @bot.command()
 async def delete(ctx,*,args):
     guild=ctx.guild
-   
+    global weapons
+    if weapons:
+        
+      for channel in guild.channels:
+        
+        
+        
+        channame=channel.name.replace("-"," ").strip()
+        
+        if (args.strip())==channame:
+          await channel.delete()
+    else:
+      await ctx.send("Safety is Currently Activated")
+        
 
-      
-    for channel in guild.channels:
-      
-      
-      
-       channame=channel.name.replace("-"," ").strip()
-       
-       if (args.strip())==channame:
-        await channel.delete()
-      
-       
-      
-      
 @bot.command()
 async def runcode(ctx,*,args):
   outputstr=""
+  errors=""
   with open("run.py","w") as python:
-    python.write(args.replace("```",""))
+    python.write('try:\n\t'+args.replace("```python","").replace("```","")+"\nexcept Exception as e:\n\tprint(e)")
     python.close()
   import subprocess
   with open("output.txt", "w+") as output:
-    subprocess.call(["python", "run.py"], stdout=output)
-    output.close()
+    try:
+      subprocess.call(["python", "run.py"], stdout=output)
+    except Exception as e:
+      errors = str(e)
+      await ctx.send("Exception:"+ e)
+      output.close()
+
   with open("output.txt", "r") as file:
   
     for line in file.readlines():
       outputstr+=line+"\n"
+  try:
     await ctx.send(outputstr)
+  except Exception as e:
+    await ctx.send("Either your code had no result or an error occured\n" + str(errors))
     output.close()
+
+@bot.command(name="timer", description="Sets a timer given a time t")
+async def timer(ctx,t):
+  t=int(t)
+  try:
+   
+    already=False
+    while t: 
+       
+        mins, secs = divmod(t, 60) 
+        timer = '{:02d}:{:02d}'.format(mins, secs) 
+        if already==False:
+         message=await ctx.send(timer)
+        already=True
+        if already==True:
+       
+         await message.edit(content=timer)
+         time.sleep(1)  
+         t -= 1
+    await ctx.send(("<@{0}> Time is up").format(ctx.message.author.id))
+  except Exception as e: 
+    await ctx.send(e)
   
 @bot.event
 async def on_guild_join(guild):
@@ -456,54 +656,30 @@ async def on_guild_join(guild):
   
     for channel in guild.text_channels:
         if channel.permissions_for(guild.me).send_messages:
-            await channel.send('Shades Initiating...')
+            await channel.send('Bot Initiating...')
         break 
+    
 @bot.event
 async def on_message(message):
-  
    global debug
-   global autoprotect
+  
    import datetime
+ 
+
+     
+   #Down here SR 
    
-   userid=os.environ.get("userx")
-   user=await bot.fetch_user(userid)
-   if autoprotect:
-    
-     if "aims at" in message.content.lower():
-    
-      if message.guild!=None:
-       
-        for member in message.guild.members:
-          if member.id==int(userid):
-            
-            if member.name.lower() in message.content.lower():
-              if message.author.id!=int(userid):
-               await message.channel.send("_Fires machine guns at {0}_".format(message.author))
-              
-               await user.send("{0} tried to shoot you at {1} in {2}" .format(message.author,datetime.datetime.now() ,message.guild.name))
-            else:
-              try: 
-                if member.nick.lower() in message.content.lower():
-                  if message.author.id!=int(userid):
-                   await message.channel.send("_Fires machine guns at {0}_".format(message.author))
-                
-                   await user.send("{0} tried to shoot you at {1} in {2}" .format(message.author,datetime.datetime.now() ,message.guild.name))
-              except:
-                print(" o")
   
-   
-   if message.author.id==int(userid): 
   
-      if bot.command_prefix in message.content:
+  
         
-          tic= time.perf_counter()
-          await bot.process_commands(message)
-      
-            
-          toc=time.perf_counter()
-        
-          if(debug==True):
-           await performance(message.channel,tic,toc)
+
+   await bot.process_commands(message)
+
+    
+
+
+ 
     
      
 keep_alive()
