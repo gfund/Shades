@@ -27,7 +27,7 @@ natalia=True
 switch=True
 intents = discord.Intents.default()
 intents.members = True
-bot = commands.Bot(command_prefix='.', description="Crimson Dynamo",help_command=None,intents=intents)
+bot = commands.Bot(command_prefix='<', description="Crimson Dynamo",help_command=None,intents=intents)
 
 # NON ASYNC DISCORD BOT FUNCTIONS 
 
@@ -72,6 +72,26 @@ async def hackchat(ctx):
     result_str = ''.join((random.choice(letters_and_digits) for i in range(length)))
     return result_str
   await ctx.send("https://beta.hack.chat/?{0}".format(gras(20))) 
+@bot.command()
+async def bunker(ctx):
+ 
+  from discord.utils import get
+  role = get(ctx.guild.roles, name="Ключ доступа к бункеру")
+  member = ctx.message.author
+  if role not in ctx.message.author.roles:
+    timenow=str(datetime.datetime.now().hour)
+    if (int(timenow)<5) or (int(timenow)>11) :
+      await ctx.send("Unlocking")
+      member = ctx.message.author
+      
+      role = get(ctx.guild.roles, name="Ключ доступа к бункеру")
+      await ctx.author.add_roles(role)
+    else:
+        #await ctx.send(timenow)
+        await ctx.send("Bunker is not open to access at this time")
+  else:
+    await ctx.send("Locking")
+    await member.remove_roles(role)
 @bot.command()
 async def google(ctx,*term):
   from six.moves.urllib.request import urlopen
@@ -210,6 +230,7 @@ async def dl(ctx, *, args):
    translator= Translator()
    translation = translator.translate(args,dest="English")
    await ctx.send(translation.text)
+
 @bot.command()
 async def restore(ctx,sid1):
 
@@ -658,7 +679,11 @@ async def on_guild_join(guild):
         if channel.permissions_for(guild.me).send_messages:
             await channel.send('Bot Initiating...')
         break 
-    
+@bot.event 
+async def on_message_edit(before, after):
+  #await before.channel.send("After Edit")
+  await bot.process_commands(after)
+
 @bot.event
 async def on_message(message):
    global debug
